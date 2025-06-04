@@ -1,4 +1,4 @@
-import { ReactElement, createElement, useEffect, useRef } from "react";
+import { ReactElement, createElement, useEffect, useRef, useState } from "react";
 import { CatalogReleaseChartContainerProps } from "../typings/CatalogReleaseChartProps";
 import * as d3 from "d3";
 
@@ -6,9 +6,42 @@ import "./ui/CatalogReleaseChart.css";
 
 export function CatalogReleaseChart({ name }: CatalogReleaseChartContainerProps): ReactElement {
     const chartRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+    // Handle resize
+    useEffect(() => {
+        const handleResize = () => {
+            if (containerRef.current) {
+                const { width } = containerRef.current.getBoundingClientRect();
+                // Set responsive dimensions
+                setDimensions({
+                    width: width,
+                    height: Math.min(600, width * 0.5) // Maintain aspect ratio, max 600px height
+                });
+            }
+        };
+
+        // Initial size
+        handleResize();
+
+        // Add resize listener
+        window.addEventListener('resize', handleResize);
+        
+        // Also observe container size changes
+        const resizeObserver = new ResizeObserver(handleResize);
+        if (containerRef.current) {
+            resizeObserver.observe(containerRef.current);
+        }
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            resizeObserver.disconnect();
+        };
+    }, []);
 
     useEffect(() => {
-        if (!chartRef.current) return;
+        if (!chartRef.current || dimensions.width === 0) return;
 
         // Clear any existing chart
         d3.select(chartRef.current).selectAll("*").remove();
@@ -29,16 +62,24 @@ export function CatalogReleaseChart({ name }: CatalogReleaseChartContainerProps)
             { name: "Semiconductor Devices", retired: new Date(2024, 1, 1), current: new Date(2024, 4, 1), upcoming: "TBD" }
         ];
 
-        // Chart dimensions
-        const margin = { top: 80, right: 150, bottom: 40, left: 180 };
-        const width = 1200 - margin.left - margin.right;
-        const height = 600 - margin.top - margin.bottom;
+        // Responsive margins based on container width
+        const margin = {
+            top: 80,
+            right: dimensions.width < 800 ? 100 : 150,
+            bottom: 40,
+            left: dimensions.width < 800 ? 120 : 180
+        };
+        
+        const width = dimensions.width - margin.left - margin.right;
+        const height = dimensions.height - margin.top - margin.bottom;
 
-        // Create SVG
+        // Create SVG with viewBox for better scaling
         const svg = d3.select(chartRef.current)
             .append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
+            .attr("width", dimensions.width)
+            .attr("height", dimensions.height)
+            .attr("viewBox", `0 0 ${dimensions.width} ${dimensions.height}`)
+            .attr("preserveAspectRatio", "xMidYMid meet")
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -117,6 +158,9 @@ export function CatalogReleaseChart({ name }: CatalogReleaseChartContainerProps)
             .attr("text-anchor", "middle")
             .text(d3.timeFormat("%-m/%-d/%Y")(today));
 
+        // Adjust font sizes for smaller screens
+        const fontSize = dimensions.width < 800 ? "12px" : "14px";
+
         // Draw industry rows
         industries.forEach((industry) => {
             const y = yScale(industry.name)! + yScale.bandwidth() / 2;
@@ -127,6 +171,7 @@ export function CatalogReleaseChart({ name }: CatalogReleaseChartContainerProps)
                 .attr("x", -10)
                 .attr("y", y + 5)
                 .attr("text-anchor", "end")
+                .style("font-size", fontSize)
                 .text(industry.name);
             
             // Industry line
@@ -217,7 +262,7 @@ export function CatalogReleaseChart({ name }: CatalogReleaseChartContainerProps)
                     .attr("transform", `rotate(45 ${currentX} ${y})`);
             }
             
-            // Upcoming box
+            // Upcoming box - adjusted positioning
             let boxX = upcomingXPos;
             if (industry.upcoming !== "TBD") {
                 const year = parseInt("20" + industry.upcoming.substring(0, 2));
@@ -226,10 +271,11 @@ export function CatalogReleaseChart({ name }: CatalogReleaseChartContainerProps)
                 if (upcomingDate <= timeScale.domain()[1]) {
                     boxX = timeScale(upcomingDate) - 30;
                 } else {
-                    boxX = width + 20;
+                    // Place TBD and future dates at the edge but within bounds
+                    boxX = width - 70; // Adjusted to keep box within chart area
                 }
             } else {
-                boxX = width + 20;
+                boxX = width - 70; // Keep TBD boxes within the chart area
             }
 
             svg.append("rect")
@@ -244,12 +290,13 @@ export function CatalogReleaseChart({ name }: CatalogReleaseChartContainerProps)
                 .attr("class", "upcoming-text")
                 .attr("x", boxX + 30)
                 .attr("y", y + 5)
+                .style("font-size", fontSize)
                 .text(industry.upcoming);
         });
-    }, []);
+    }, [dimensions]);
 
     return (
-        <div className={`catalog-release-chart ${name}`}>
+        <div className={`catalog-release-chart ${name}`} ref={containerRef} style={{ width: '100%', height: '100%' }}>
             <div className="chart-container">
                 <h1 className="chart-title">Catalog Release Schedule</h1>
                 
@@ -280,7 +327,7 @@ export function CatalogReleaseChart({ name }: CatalogReleaseChartContainerProps)
                     </div>
                 </div>
                 
-                <div ref={chartRef} id="chart"></div>
+                <div ref={chartRef} id="chart" style={{ width: '100%' }}></div>
             </div>
         </div>
     );
