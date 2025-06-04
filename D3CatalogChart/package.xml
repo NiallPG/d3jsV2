@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<package xmlns="http://www.mendix.com/package/1.0/">
+    <clientModule name="D3CatalogChart" version="1.0.0" xmlns="http://www.mendix.com/clientModule/1.0/">
+        <widgetFiles>
+            <widgetFile path="D3CatalogChart/D3CatalogChart.xml"/>
+        </widgetFiles>
+        <files>
+            <file path="D3CatalogChart/ui/"/>
+            <file path="D3CatalogChart/lib/"/> 
+        </files>
+    </clientModule>
+</package> 
