@@ -1,34 +1,46 @@
 import { ReactElement, createElement, useEffect, useRef, useState } from "react";
-import { CatalogReleaseChartContainerProps } from "../typings/CatalogReleaseChartProps";
+import { CatalogReleaseChartContainerProps, IndustryData } from "../typings/CatalogReleaseChartProps";
+import { ValueStatus } from "mendix";
 import * as d3 from "d3";
 
 import "./ui/CatalogReleaseChart.css";
 
-export function CatalogReleaseChart({ name }: CatalogReleaseChartContainerProps): ReactElement {
+export function CatalogReleaseChart(props: CatalogReleaseChartContainerProps): ReactElement {
+    const {
+        name,
+        catalogData,
+        nameAttribute,
+        retiredDateAttribute,
+        currentDateAttribute,
+        upcomingCodeAttribute,
+        chartTitle,
+        enableLegend,
+        onItemClick,
+        refreshInterval,
+        chartHeight,
+        showToday
+    } = props;
+
     const chartRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+    const [dimensions, setDimensions] = useState({ width: 0, height: chartHeight });
+    const [industries, setIndustries] = useState<IndustryData[]>([]);
 
     // Handle resize
     useEffect(() => {
         const handleResize = () => {
             if (containerRef.current) {
                 const { width } = containerRef.current.getBoundingClientRect();
-                // Set responsive dimensions
                 setDimensions({
                     width: width,
-                    height: Math.min(600, width * 0.5) // Maintain aspect ratio, max 600px height
+                    height: chartHeight
                 });
             }
         };
 
-        // Initial size
         handleResize();
-
-        // Add resize listener
         window.addEventListener('resize', handleResize);
         
-        // Also observe container size changes
         const resizeObserver = new ResizeObserver(handleResize);
         if (containerRef.current) {
             resizeObserver.observe(containerRef.current);
@@ -38,29 +50,66 @@ export function CatalogReleaseChart({ name }: CatalogReleaseChartContainerProps)
             window.removeEventListener('resize', handleResize);
             resizeObserver.disconnect();
         };
-    }, []);
+    }, [chartHeight]);
 
+    // Process data from Mendix data source
     useEffect(() => {
-        if (!chartRef.current || dimensions.width === 0) return;
+        if (catalogData && catalogData.status === ValueStatus.Available && catalogData.items) {
+            const processedIndustries: IndustryData[] = catalogData.items
+                .map(item => {
+                    try {
+                        const name = nameAttribute.get(item);
+                        const retiredDate = retiredDateAttribute.get(item);
+                        const currentDate = currentDateAttribute.get(item);
+                        const upcomingCode = upcomingCodeAttribute.get(item);
+
+                        // Validate that all required data is available
+                        if (name.status !== ValueStatus.Available ||
+                            retiredDate.status !== ValueStatus.Available ||
+                            currentDate.status !== ValueStatus.Available ||
+                            upcomingCode.status !== ValueStatus.Available) {
+                            return null;
+                        }
+
+                        return {
+                            name: name.value || "",
+                            retired: retiredDate.value || new Date(),
+                            current: currentDate.value || new Date(),
+                            upcoming: upcomingCode.value || "TBD"
+                        };
+                    } catch (error) {
+                        console.error("Error processing catalog data item:", error);
+                        return null;
+                    }
+                })
+                .filter((item): item is IndustryData => item !== null)
+                .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically by name
+
+            setIndustries(processedIndustries);
+        } else {
+            setIndustries([]);
+        }
+    }, [catalogData, nameAttribute, retiredDateAttribute, currentDateAttribute, upcomingCodeAttribute]);
+
+    // Auto-refresh functionality
+    useEffect(() => {
+        if (refreshInterval > 0) {
+            const interval = setInterval(() => {
+                if (catalogData && catalogData.reload) {
+                    catalogData.reload();
+                }
+            }, refreshInterval * 1000);
+
+            return () => clearInterval(interval);
+        }
+    }, [refreshInterval, catalogData]);
+
+    // Render chart
+    useEffect(() => {
+        if (!chartRef.current || dimensions.width === 0 || industries.length === 0) return;
 
         // Clear any existing chart
         d3.select(chartRef.current).selectAll("*").remove();
-
-        // Data structure
-        const industries = [
-            { name: "Aerospace & Defense", retired: new Date(2023, 10, 1), current: new Date(2024, 11, 1), upcoming: "2506" },
-            { name: "Automotive", retired: new Date(2023, 2, 1), current: new Date(2024, 5, 1), upcoming: "TBD" },
-            { name: "Battery", retired: new Date(2025, 0, 1), current: new Date(2025, 4, 1), upcoming: "2507" },
-            { name: "CP&R", retired: new Date(2024, 8, 1), current: new Date(2024, 11, 1), upcoming: "TBD" },
-            { name: "Electronics", retired: new Date(2025, 2, 1), current: new Date(2025, 4, 1), upcoming: "2508" },
-            { name: "Energy & Utilities", retired: new Date(2024, 8, 1), current: new Date(2025, 1, 1), upcoming: "2505" },
-            { name: "Heavy Equipment", retired: new Date(2023, 5, 1), current: new Date(2023, 5, 1), upcoming: "TBD" },
-            { name: "Industrial Machinery", retired: new Date(2025, 2, 1), current: new Date(2025, 5, 1), upcoming: "2509" },
-            { name: "Marine", retired: new Date(2024, 2, 1), current: new Date(2024, 2, 1), upcoming: "TBD" },
-            { name: "Medical Devices", retired: new Date(2024, 9, 1), current: new Date(2025, 0, 1), upcoming: "TBD" },
-            { name: "Pharmaceuticals", retired: new Date(2024, 10, 1), current: new Date(2025, 2, 1), upcoming: "2506" },
-            { name: "Semiconductor Devices", retired: new Date(2024, 1, 1), current: new Date(2024, 4, 1), upcoming: "TBD" }
-        ];
 
         // Responsive margins based on container width
         const margin = {
@@ -131,32 +180,34 @@ export function CatalogReleaseChart({ name }: CatalogReleaseChartContainerProps)
                 .text(d3.timeFormat("%b-%y")(date));
         });
 
-        // Add today's date
-        const today = new Date();
-        const todayX = timeScale(today);
-        
-        // Today's vertical line
-        svg.append("line")
-            .attr("class", "today-line")
-            .attr("x1", todayX)
-            .attr("y1", -40)
-            .attr("x2", todayX)
-            .attr("y2", height);
-        
-        // Today's circle
-        svg.append("circle")
-            .attr("class", "today-circle")
-            .attr("cx", todayX)
-            .attr("cy", -40)
-            .attr("r", 8);
-        
-        // Today's date label
-        svg.append("text")
-            .attr("class", "today-text")
-            .attr("x", todayX)
-            .attr("y", -65)
-            .attr("text-anchor", "middle")
-            .text(d3.timeFormat("%-m/%-d/%Y")(today));
+        // Add today's date (if enabled)
+        if (showToday) {
+            const today = new Date();
+            const todayX = timeScale(today);
+            
+            // Today's vertical line
+            svg.append("line")
+                .attr("class", "today-line")
+                .attr("x1", todayX)
+                .attr("y1", -40)
+                .attr("x2", todayX)
+                .attr("y2", height);
+            
+            // Today's circle
+            svg.append("circle")
+                .attr("class", "today-circle")
+                .attr("cx", todayX)
+                .attr("cy", -40)
+                .attr("r", 8);
+            
+            // Today's date label
+            svg.append("text")
+                .attr("class", "today-text")
+                .attr("x", todayX)
+                .attr("y", -65)
+                .attr("text-anchor", "middle")
+                .text(d3.timeFormat("%-m/%-d/%Y")(today));
+        }
 
         // Adjust font sizes for smaller screens
         const fontSize = dimensions.width < 800 ? "12px" : "14px";
@@ -239,27 +290,37 @@ export function CatalogReleaseChart({ name }: CatalogReleaseChartContainerProps)
             // Retired marker (diamond)
             if (industry.retired) {
                 const retiredX = timeScale(industry.retired);
-                svg.append("rect")
+                const retiredMarker = svg.append("rect")
                     .attr("class", "retired-marker")
                     .attr("x", retiredX - 10)
                     .attr("y", y - 10)
                     .attr("width", 20)
                     .attr("height", 20)
                     .attr("rx", 10)
-                    .attr("transform", `rotate(45 ${retiredX} ${y})`);
+                    .attr("transform", `rotate(45 ${retiredX} ${y})`)
+                    .style("cursor", onItemClick ? "pointer" : "default");
+
+                if (onItemClick) {
+                    retiredMarker.on("click", () => onItemClick.execute());
+                }
             }
             
             // Current marker (diamond)
             if (industry.current) {
                 const currentX = timeScale(industry.current);
-                svg.append("rect")
+                const currentMarker = svg.append("rect")
                     .attr("class", "current-marker")
                     .attr("x", currentX - 10)
                     .attr("y", y - 10)
                     .attr("width", 20)
                     .attr("height", 20)
                     .attr("rx", 10)
-                    .attr("transform", `rotate(45 ${currentX} ${y})`);
+                    .attr("transform", `rotate(45 ${currentX} ${y})`)
+                    .style("cursor", onItemClick ? "pointer" : "default");
+
+                if (onItemClick) {
+                    currentMarker.on("click", () => onItemClick.execute());
+                }
             }
             
             // Upcoming box - adjusted positioning
@@ -271,20 +332,24 @@ export function CatalogReleaseChart({ name }: CatalogReleaseChartContainerProps)
                 if (upcomingDate <= timeScale.domain()[1]) {
                     boxX = timeScale(upcomingDate) - 30;
                 } else {
-                    // Place TBD and future dates at the edge but within bounds
-                    boxX = width - 70; // Adjusted to keep box within chart area
+                    boxX = width - 70;
                 }
             } else {
-                boxX = width - 70; // Keep TBD boxes within the chart area
+                boxX = width - 70;
             }
 
-            svg.append("rect")
+            const upcomingBox = svg.append("rect")
                 .attr("class", "upcoming-box")
                 .attr("x", boxX)
                 .attr("y", y - 15)
                 .attr("width", 60)
                 .attr("height", 30)
-                .attr("rx", 4);
+                .attr("rx", 4)
+                .style("cursor", onItemClick ? "pointer" : "default");
+            
+            if (onItemClick) {
+                upcomingBox.on("click", () => onItemClick.execute());
+            }
             
             svg.append("text")
                 .attr("class", "upcoming-text")
@@ -293,39 +358,79 @@ export function CatalogReleaseChart({ name }: CatalogReleaseChartContainerProps)
                 .style("font-size", fontSize)
                 .text(industry.upcoming);
         });
-    }, [dimensions]);
+    }, [dimensions, industries, showToday, onItemClick]);
+
+    // Loading state
+    if (!catalogData || catalogData.status === ValueStatus.Loading) {
+        return (
+            <div className={`catalog-release-chart ${name}`} ref={containerRef}>
+                <div className="chart-container">
+                    <h1 className="chart-title">{chartTitle}</h1>
+                    <div className="loading-message">Loading catalog data...</div>
+                </div>
+            </div>
+        );
+    }
+
+    // Error state
+    if (catalogData.status === ValueStatus.Unavailable) {
+        return (
+            <div className={`catalog-release-chart ${name}`} ref={containerRef}>
+                <div className="chart-container">
+                    <h1 className="chart-title">{chartTitle}</h1>
+                    <div className="error-message">Unable to load catalog data. Please check your data source configuration.</div>
+                </div>
+            </div>
+        );
+    }
+
+    // No data state
+    if (!catalogData.items || catalogData.items.length === 0) {
+        return (
+            <div className={`catalog-release-chart ${name}`} ref={containerRef}>
+                <div className="chart-container">
+                    <h1 className="chart-title">{chartTitle}</h1>
+                    <div className="no-data-message">No catalog data available. Please add catalog release schedules to see the chart.</div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={`catalog-release-chart ${name}`} ref={containerRef} style={{ width: '100%', height: '100%' }}>
             <div className="chart-container">
-                <h1 className="chart-title">Catalog Release Schedule</h1>
+                <h1 className="chart-title">{chartTitle}</h1>
                 
-                <div className="legend">
-                    <div className="legend-item">
-                        <svg className="legend-symbol" viewBox="0 0 20 20">
-                            <rect x="2" y="2" width="16" height="16" rx="50%" className="retired-marker"/>
-                        </svg>
-                        <span>Retired Catalog</span>
+                {enableLegend && (
+                    <div className="legend">
+                        <div className="legend-item">
+                            <svg className="legend-symbol" viewBox="0 0 20 20">
+                                <rect x="2" y="2" width="16" height="16" rx="50%" className="retired-marker"/>
+                            </svg>
+                            <span>Retired Catalog</span>
+                        </div>
+                        <div className="legend-item">
+                            <svg className="legend-symbol" viewBox="0 0 20 20">
+                                <rect x="2" y="2" width="16" height="16" rx="50%" className="current-marker"/>
+                            </svg>
+                            <span>Current Catalog</span>
+                        </div>
+                        <div className="legend-item">
+                            <svg className="legend-symbol" viewBox="0 0 20 20">
+                                <rect x="2" y="2" width="16" height="16" rx="2" className="upcoming-box"/>
+                            </svg>
+                            <span>Upcoming Catalog</span>
+                        </div>
+                        {showToday && (
+                            <div className="legend-item">
+                                <svg className="legend-symbol" viewBox="0 0 20 20">
+                                    <circle cx="10" cy="10" r="5" className="today-circle"/>
+                                </svg>
+                                <span>Today's Date</span>
+                            </div>
+                        )}
                     </div>
-                    <div className="legend-item">
-                        <svg className="legend-symbol" viewBox="0 0 20 20">
-                            <rect x="2" y="2" width="16" height="16" rx="50%" className="current-marker"/>
-                        </svg>
-                        <span>Current Catalog</span>
-                    </div>
-                    <div className="legend-item">
-                        <svg className="legend-symbol" viewBox="0 0 20 20">
-                            <rect x="2" y="2" width="16" height="16" rx="2" className="upcoming-box"/>
-                        </svg>
-                        <span>Upcoming Catalog</span>
-                    </div>
-                    <div className="legend-item">
-                        <svg className="legend-symbol" viewBox="0 0 20 20">
-                            <circle cx="10" cy="10" r="5" className="today-circle"/>
-                        </svg>
-                        <span>Today's Date</span>
-                    </div>
-                </div>
+                )}
                 
                 <div ref={chartRef} id="chart" style={{ width: '100%' }}></div>
             </div>

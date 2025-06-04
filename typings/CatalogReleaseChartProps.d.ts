@@ -1,16 +1,34 @@
 /**
- * This file was generated from CatalogReleaseChart.xml
- * WARNING: All changes made to this file will be overwritten
- * @author Mendix Widgets Framework Team
+ * Updated TypeScript interfaces for CatalogReleaseChart widget
+ * This file defines the props interface based on the new XML configuration
  */
 import { CSSProperties } from "react";
+import { ActionValue, DynamicValue, EditableValue, ListValue, ListActionValue, ListAttributeValue } from "mendix";
 
 export interface CatalogReleaseChartContainerProps {
     name: string;
     class: string;
     style?: CSSProperties;
     tabIndex?: number;
-    sampleText: string;
+    
+    // Data Source Properties
+    catalogData: ListValue;
+    nameAttribute: ListAttributeValue<string>;
+    retiredDateAttribute: ListAttributeValue<Date>;
+    currentDateAttribute: ListAttributeValue<Date>;
+    upcomingCodeAttribute: ListAttributeValue<string>;
+    
+    // General Properties
+    chartTitle: string;
+    enableLegend: boolean;
+    
+    // Chart Behavior Properties  
+    onItemClick?: ActionValue;
+    refreshInterval: number;
+    
+    // Appearance Properties
+    chartHeight: number;
+    showToday: boolean;
 }
 
 export interface CatalogReleaseChartPreviewProps {
@@ -24,5 +42,43 @@ export interface CatalogReleaseChartPreviewProps {
     readOnly: boolean;
     renderMode: "design" | "xray" | "structure";
     translate: (text: string) => string;
-    sampleText: string;
+    
+    // Data Source Properties (preview)
+    catalogData: {} | { caption: string } | { type: string } | null;
+    nameAttribute: string;
+    retiredDateAttribute: string;
+    currentDateAttribute: string;
+    upcomingCodeAttribute: string;
+    
+    // General Properties (preview)
+    chartTitle: string;
+    enableLegend: boolean;
+    
+    // Chart Behavior Properties (preview)
+    onItemClick: {} | null;
+    refreshInterval: number | null;
+    
+    // Appearance Properties (preview)
+    chartHeight: number | null;
+    showToday: boolean;
+}
+
+// Interface for the processed industry data
+export interface IndustryData {
+    name: string;
+    retired: Date;
+    current: Date;
+    upcoming: string;
+}
+
+// Interface for chart dimensions
+export interface ChartDimensions {
+    width: number;
+    height: number;
+    margin: {
+        top: number;
+        right: number;
+        bottom: number;
+        left: number;
+    };
 }

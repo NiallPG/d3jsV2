@@ -4,15 +4,82 @@
         xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../node_modules/mendix/custom_widget.xsd">
     <name>Catalog Release Chart</name>
-    <description>A D3.js chart showing a catalog release schedule</description>
+    <description>A D3.js chart showing a catalog release schedule with editable data from Mendix backend</description>
     <icon/>
     <properties>
+        <propertyGroup caption="Data Source">
+            <property key="catalogData" type="datasource" isList="true" required="true">
+                <caption>Catalog Release Data</caption>
+                <description>Data source containing catalog release schedule information</description>
+            </property>
+            
+            <property key="nameAttribute" type="attribute" dataSource="catalogData" required="true">
+                <caption>Name</caption>
+                <description>Industry or category name</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+            
+            <property key="retiredDateAttribute" type="attribute" dataSource="catalogData" required="true">
+                <caption>Retired Date</caption>
+                <description>Date when the catalog was retired</description>
+                <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
+            
+            <property key="currentDateAttribute" type="attribute" dataSource="catalogData" required="true">
+                <caption>Current Date</caption>
+                <description>Date of the current catalog</description>
+                <attributeTypes>
+                    <attributeType name="DateTime"/>
+                </attributeTypes>
+            </property>
+            
+            <property key="upcomingCodeAttribute" type="attribute" dataSource="catalogData" required="true">
+                <caption>Upcoming Code</caption>
+                <description>Code for upcoming catalog (e.g., "2507" or "TBD")</description>
+                <attributeTypes>
+                    <attributeType name="String"/>
+                </attributeTypes>
+            </property>
+        </propertyGroup>
+        
         <propertyGroup caption="General">
-            <property key="sampleText" type="string" required="false" defaultValue="Catalog Release Chart">
+            <property key="chartTitle" type="string" required="false" defaultValue="Catalog Release Schedule">
                 <caption>Chart Title</caption>
-                <description>Optional custom title for the chart</description>
+                <description>Title displayed at the top of the chart</description>
+            </property>
+            
+            <property key="enableLegend" type="boolean" defaultValue="true">
+                <caption>Show Legend</caption>
+                <description>Display the legend showing chart symbols</description>
+            </property>
+        </propertyGroup>
+        
+        <propertyGroup caption="Chart Behavior">
+            <property key="onItemClick" type="action" required="false">
+                <caption>On Item Click</caption>
+                <description>Action to execute when a catalog item is clicked</description>
+            </property>
+            
+            <property key="refreshInterval" type="integer" defaultValue="0">
+                <caption>Auto Refresh Interval (seconds)</caption>
+                <description>Automatic refresh interval in seconds (0 = no auto refresh)</description>
+            </property>
+        </propertyGroup>
+        
+        <propertyGroup caption="Appearance">
+            <property key="chartHeight" type="integer" defaultValue="600">
+                <caption>Chart Height</caption>
+                <description>Height of the chart in pixels</description>
+            </property>
+            
+            <property key="showToday" type="boolean" defaultValue="true">
+                <caption>Show Today Line</caption>
+                <description>Display a vertical line indicating today's date</description>
             </property>
         </propertyGroup>
     </properties>
 </widget>
-
