@@ -1,6 +1,112 @@
-/*
-Place your custom CSS here
-*/
-.widget-hello-world {
-
+.catalog-release-chart {
+    font-family: Arial, sans-serif;
+    margin: 20px;
 }
+
+.catalog-release-chart .chart-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.catalog-release-chart .chart-title {
+    text-align: center;
+    font-size: 36px;
+    font-weight: bold;
+    color: #2c5282;
+    margin-bottom: 20px;
+}
+
+.catalog-release-chart .legend {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.catalog-release-chart .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.catalog-release-chart .legend-symbol {
+    width: 20px;
+    height: 20px;
+}
+
+.catalog-release-chart .industry-line {
+    stroke: #e0e0e0;
+    stroke-width: 2;
+    stroke-dasharray: 3, 3;
+}
+
+.catalog-release-chart .continuity-line {
+    stroke: #757575;
+    stroke-width: 3;
+    opacity: 1;
+}
+
+.catalog-release-chart .future-continuity-line {
+    stroke: #ff9800;
+    stroke-width: 3;
+    opacity: 1;
+}
+
+.catalog-release-chart .timeline-line {
+    stroke: #2c5282;
+    stroke-width: 3;
+}
+
+.catalog-release-chart .today-line {
+    stroke: #2c5282;
+    stroke-width: 2;
+    stroke-dasharray: 5, 5;
+}
+
+.catalog-release-chart .today-circle {
+    fill: #2c5282;
+}
+
+.catalog-release-chart .retired-marker {
+    fill: #9e9e9e;
+    stroke: #757575;
+    stroke-width: 2;
+}
+
+.catalog-release-chart .current-marker {
+    fill: #8bc34a;
+    stroke: #689f38;
+    stroke-width: 2;
+}
+
+.catalog-release-chart .upcoming-box {
+    fill: #ff9800;
+    stroke: #f57c00;
+    stroke-width: 2;
+}
+
+.catalog-release-chart .upcoming-text {
+    fill: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-anchor: middle;
+}
+
+.catalog-release-chart .industry-text {
+    font-size: 14px;
+    fill: #333;
+}
+
+.catalog-release-chart .date-text {
+    font-size: 14px;
+    fill: #2c5282;
+    font-weight: bold;
+}
+
+.catalog-release-chart .today-text {
+    font-size: 14px;
+    fill: #2c5282;
+}
+
