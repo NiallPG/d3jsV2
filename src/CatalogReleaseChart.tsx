@@ -1,9 +1,16 @@
 import { ReactElement, createElement, useEffect, useRef, useState } from "react";
-import { CatalogReleaseChartContainerProps, IndustryData } from "../typings/CatalogReleaseChartProps";
+import { CatalogReleaseChartContainerProps } from "../typings/CatalogReleaseChartProps";
 import { ValueStatus } from "mendix";
 import * as d3 from "d3";
 
 import "./ui/CatalogReleaseChart.css";
+
+interface IndustryData {
+    name: string;
+    retired: Date;
+    current: Date;
+    upcoming: string;
+}
 
 export function CatalogReleaseChart(props: CatalogReleaseChartContainerProps): ReactElement {
     const {
