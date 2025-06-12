@@ -338,14 +338,12 @@ export function CatalogReleaseChart(props: CatalogReleaseChartContainerProps): R
             // Retired marker (diamond)
             if (industry.retired) {
                 const retiredX = timeScale(industry.retired);
-                const retiredMarker = svg.append("rect")
+                const retiredMarker = svg.append("circle")
                     .attr("class", "retired-marker")
-                    .attr("x", retiredX - 10)
-                    .attr("y", y - 10)
-                    .attr("width", 20)
-                    .attr("height", 20)
-                    .attr("rx", 10)
-                    .attr("transform", `rotate(45 ${retiredX} ${y})`)
+                    .attr("cx", retiredX)
+                    .attr("cy", y)
+                    .attr("r", 8)
+                    .attr("fill", theme.primary)
                     .style("cursor", onItemClick ? "pointer" : "default");
 
                 if (onItemClick) {
@@ -356,14 +354,12 @@ export function CatalogReleaseChart(props: CatalogReleaseChartContainerProps): R
             // Current marker (diamond)
             if (industry.current) {
                 const currentX = timeScale(industry.current);
-                const currentMarker = svg.append("rect")
+                const currentMarker = svg.append("circle")
                     .attr("class", "current-marker")
-                    .attr("x", currentX - 10)
-                    .attr("y", y - 10)
-                    .attr("width", 20)
-                    .attr("height", 20)
-                    .attr("rx", 10)
-                    .attr("transform", `rotate(45 ${currentX} ${y})`)
+                    .attr("cx", currentX)
+                    .attr("cy", y)
+                    .attr("r", 8)
+                    .attr("fill", theme.primary)
                     .style("cursor", onItemClick ? "pointer" : "default");
 
                 if (onItemClick) {
@@ -451,17 +447,31 @@ export function CatalogReleaseChart(props: CatalogReleaseChartContainerProps): R
                 {enableLegend && (
                     <div className="legend">
                         <div className="legend-item">
-                            <div className="legend-symbol retired-marker"></div>
+                            <svg className="legend-symbol" width="20" height="20" viewBox="0 0 20 20">
+                                <circle cx="10" cy="10" r="8" className="retired-marker" />
+                            </svg>
                             <span>Retired</span>
                         </div>
                         <div className="legend-item">
-                            <div className="legend-symbol current-marker"></div>
+                            <svg className="legend-symbol" width="20" height="20" viewBox="0 0 20 20">
+                                <circle cx="10" cy="10" r="8" className="current-marker" />
+                            </svg>
                             <span>Current</span>
                         </div>
                         <div className="legend-item">
-                            <div className="legend-symbol upcoming-box"></div>
+                            <svg className="legend-symbol" width="32" height="20" viewBox="0 0 32 20">
+                                <rect x="2" y="2" width="28" height="16" rx="4" className="upcoming-box" />
+                            </svg>
                             <span>Upcoming</span>
                         </div>
+                        {showToday && (
+                            <div className="legend-item">
+                                <svg className="legend-symbol" width="20" height="20" viewBox="0 0 20 20">
+                                    <circle cx="10" cy="10" r="8" className="today-circle" />
+                                </svg>
+                                <span>Today</span>
+                            </div>
+                        )}
                     </div>
                 )}
                 <div id="chart" ref={chartRef}></div>
