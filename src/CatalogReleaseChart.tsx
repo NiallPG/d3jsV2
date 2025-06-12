@@ -3,6 +3,9 @@ import { CatalogReleaseChartContainerProps } from "../typings/CatalogReleaseChar
 import { ValueStatus } from "mendix";
 import * as d3 from "d3";
 
+// Main react component for the Catalog Release Chart
+// Renders d3 chart
+
 import "./ui/CatalogReleaseChart.css";
 
 interface IndustryData {
@@ -29,9 +32,21 @@ export function CatalogReleaseChart(props: CatalogReleaseChartContainerProps): R
     } = props;
 
     const chartRef = useRef<HTMLDivElement>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
+    // Points to the div where the D3.js chart will be rendered. 
+    // D3 needs direct DOM access to create SVG elements, so this ref 
+    // provides a stable reference to the chart container.
+
+
+    const containerRef = useRef<HTMLDivElement>(null); // Refs don't trigger re-renders when changed
+    // Points to the outer container div. Used to measure the widget's 
+    // available width for responsive sizing.
+
     const [dimensions, setDimensions] = useState({ width: 0, height: chartHeight });
+    // State to hold the dimensions of the chart, stuff is calculated dynamically
+    // so width is just a placeholder until the first resize.
+
     const [industries, setIndustries] = useState<IndustryData[]>([]);
+    // State to hold the processed industry data from the Mendix data source.
 
     // Handle resize
     useEffect(() => {

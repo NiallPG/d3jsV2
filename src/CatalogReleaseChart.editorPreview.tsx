@@ -19,5 +19,7 @@ export function preview({ chartTitle }: CatalogReleaseChartPreviewProps): ReactE
 }
 
 export function getPreviewCss(): string {
+    // This function returns the CSS for the preview component.
+    // It is used to style the preview in the Mendix Studio Pro.
     return require("./ui/CatalogReleaseChart.css");
 }
