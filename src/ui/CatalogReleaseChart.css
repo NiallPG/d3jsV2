@@ -7,7 +7,7 @@
 }
 
 .catalog-release-chart .chart-container {
-    background-color: white;
+    background-color: var(--background-color, white);
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -16,14 +16,16 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    transition: background-color 0.3s ease;
 }
 
 .catalog-release-chart .chart-title {
     text-align: center;
     font-size: 36px;
     font-weight: bold;
-    color: #2c5282;
+    color: var(--primary-color, #2c5282);
     margin-bottom: 20px;
+    transition: color 0.3s ease;
 }
 
 /* Responsive title sizing */
@@ -40,6 +42,8 @@
     margin-bottom: 20px;
     font-size: 14px;
     flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    color: var(--text-color, #333);
+    transition: color 0.3s ease;
 }
 
 @media (max-width: 800px) {
@@ -75,77 +79,114 @@
 }
 
 .catalog-release-chart .industry-line {
-    stroke: #e0e0e0;
+    stroke: var(--border-color, #e0e0e0);
     stroke-width: 2;
     stroke-dasharray: 3, 3;
+    transition: stroke 0.3s ease;
 }
 
 .catalog-release-chart .continuity-line {
-    stroke: #757575;
+    stroke: var(--secondary-color, #757575);
     stroke-width: 3;
     opacity: 1;
+    transition: stroke 0.3s ease;
 }
 
 .catalog-release-chart .future-continuity-line {
-    stroke: #ff9800;
+    stroke: var(--accent-color, #ff9800);
     stroke-width: 3;
     opacity: 1;
+    transition: stroke 0.3s ease;
 }
 
 .catalog-release-chart .timeline-line {
-    stroke: #2c5282;
+    stroke: var(--primary-color, #2c5282);
     stroke-width: 3;
+    transition: stroke 0.3s ease;
 }
 
 .catalog-release-chart .today-line {
-    stroke: #2c5282;
+    stroke: var(--primary-color, #2c5282);
     stroke-width: 2;
     stroke-dasharray: 5, 5;
+    transition: stroke 0.3s ease;
 }
 
 .catalog-release-chart .today-circle {
-    fill: #2c5282;
+    fill: var(--primary-color, #2c5282);
+    transition: fill 0.3s ease;
 }
 
 .catalog-release-chart .retired-marker {
-    fill: #9e9e9e;
-    stroke: #757575;
+    fill: var(--muted-color, #9e9e9e);
+    stroke: var(--secondary-color, #757575);
     stroke-width: 2;
+    transition: fill 0.3s ease, stroke 0.3s ease;
 }
 
 .catalog-release-chart .current-marker {
-    fill: #8bc34a;
-    stroke: #689f38;
+    fill: var(--success-color, #8bc34a);
+    stroke: var(--success-color, #689f38);
     stroke-width: 2;
+    transition: fill 0.3s ease, stroke 0.3s ease;
 }
 
 .catalog-release-chart .upcoming-box {
-    fill: #ff9800;
-    stroke: #f57c00;
+    fill: var(--accent-color, #ff9800);
+    stroke: var(--accent-color, #f57c00);
     stroke-width: 2;
+    transition: fill 0.3s ease, stroke 0.3s ease;
 }
 
 .catalog-release-chart .upcoming-text {
-    fill: white;
+    fill: var(--text-color, white);
     font-size: 14px;
     font-weight: bold;
     text-anchor: middle;
+    transition: fill 0.3s ease;
 }
 
 .catalog-release-chart .industry-text {
     font-size: 14px;
-    fill: #333;
+    fill: var(--text-color, #333);
+    transition: fill 0.3s ease;
 }
 
 .catalog-release-chart .date-text {
     font-size: 14px;
-    fill: #2c5282;
+    fill: var(--primary-color, #2c5282);
     font-weight: bold;
+    transition: fill 0.3s ease;
 }
 
 .catalog-release-chart .today-text {
     font-size: 14px;
-    fill: #2c5282;
+    fill: var(--primary-color, #2c5282);
+    transition: fill 0.3s ease;
+}
+
+/* Dark mode specific styles */
+.catalog-release-chart[data-theme="dark"] {
+    --background-color: #010028;
+    --text-color: #ffffff;
+    --primary-color: #00cbd3;
+    --secondary-color: #9b9ca4;
+    --accent-color: #00cbd3;
+    --success-color: #00cbd3;
+    --muted-color: #9b9ca4;
+    --border-color: #23233b;
+}
+
+/* Light mode specific styles */
+.catalog-release-chart[data-theme="light"] {
+    --background-color: #ffffff;
+    --text-color: #333333;
+    --primary-color: #2c5282;
+    --secondary-color: #757575;
+    --accent-color: #ff9800;
+    --success-color: #8bc34a;
+    --muted-color: #9e9e9e;
+    --border-color: #e0e0e0;
 }
 
 /* Ensure widget container in Mendix respects sizing */

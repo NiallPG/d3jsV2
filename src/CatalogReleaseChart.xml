@@ -56,6 +56,11 @@
                 <caption>Show Legend</caption>
                 <description>Display the legend showing chart symbols</description>
             </property>
+
+            <property key="useDarkMode" type="boolean" defaultValue="false">
+                <caption>Use Dark Mode</caption>
+                <description>Toggle between light and dark theme</description>
+            </property>
         </propertyGroup>
         
         <propertyGroup caption="Chart Behavior">

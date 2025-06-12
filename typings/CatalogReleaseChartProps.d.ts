@@ -18,6 +18,7 @@ export interface CatalogReleaseChartContainerProps {
     upcomingCodeAttribute: ListAttributeValue<string>;
     chartTitle: string;
     enableLegend: boolean;
+    useDarkMode: boolean;
     onItemClick?: ActionValue;
     refreshInterval: number;
     chartHeight: number;
@@ -42,6 +43,7 @@ export interface CatalogReleaseChartPreviewProps {
     upcomingCodeAttribute: string;
     chartTitle: string;
     enableLegend: boolean;
+    useDarkMode: boolean;
     onItemClick: {} | null;
     refreshInterval: number | null;
     chartHeight: number | null;

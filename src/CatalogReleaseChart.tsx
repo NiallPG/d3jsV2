@@ -15,6 +15,29 @@ interface IndustryData {
     upcoming: string;
 }
 
+// Theme colors
+const lightTheme = {
+    background: "#ffffff",
+    text: "#333333",
+    primary: "#2c5282",
+    secondary: "#757575",
+    accent: "#ff9800",
+    success: "#8bc34a",
+    muted: "#9e9e9e",
+    border: "#e0e0e0"
+};
+
+const darkTheme = {
+    background: "#010028",
+    text: "#ffffff",
+    primary: "#00cbd3",
+    secondary: "#9b9ca4",
+    accent: "#00cbd3",
+    success: "#00cbd3",
+    muted: "#9b9ca4",
+    border: "#23233b"
+};
+
 export function CatalogReleaseChart(props: CatalogReleaseChartContainerProps): ReactElement {
     const {
         name,
@@ -28,8 +51,11 @@ export function CatalogReleaseChart(props: CatalogReleaseChartContainerProps): R
         onItemClick,
         refreshInterval,
         chartHeight,
-        showToday
+        showToday,
+        useDarkMode
     } = props;
+
+    const theme = useDarkMode ? darkTheme : lightTheme;
 
     const chartRef = useRef<HTMLDivElement>(null);
     // Points to the div where the D3.js chart will be rendered. 
@@ -192,7 +218,7 @@ export function CatalogReleaseChart(props: CatalogReleaseChartContainerProps): R
                 .attr("cx", x)
                 .attr("cy", -40)
                 .attr("r", 4)
-                .attr("fill", "#2c5282");
+                .attr("fill", theme.primary);
             
             svg.append("text")
                 .attr("class", "date-text")
@@ -380,7 +406,7 @@ export function CatalogReleaseChart(props: CatalogReleaseChartContainerProps): R
                 .style("font-size", fontSize)
                 .text(industry.upcoming);
         });
-    }, [dimensions, industries, showToday, onItemClick]);
+    }, [dimensions, industries, showToday, onItemClick, theme]);
 
     // Loading state
     if (!catalogData || catalogData.status === ValueStatus.Loading) {
@@ -419,42 +445,26 @@ export function CatalogReleaseChart(props: CatalogReleaseChartContainerProps): R
     }
 
     return (
-        <div className={`catalog-release-chart ${name}`} ref={containerRef} style={{ width: '100%', height: '100%' }}>
-            <div className="chart-container">
-                <h1 className="chart-title">{chartTitle}</h1>
-                
+        <div className="catalog-release-chart" data-theme={useDarkMode ? "dark" : "light"}>
+            <div className="chart-container" ref={containerRef}>
+                {chartTitle && <h1 className="chart-title">{chartTitle}</h1>}
                 {enableLegend && (
                     <div className="legend">
                         <div className="legend-item">
-                            <svg className="legend-symbol" viewBox="0 0 20 20">
-                                <rect x="2" y="2" width="16" height="16" rx="50%" className="retired-marker"/>
-                            </svg>
-                            <span>Retired Catalog</span>
+                            <div className="legend-symbol retired-marker"></div>
+                            <span>Retired</span>
                         </div>
                         <div className="legend-item">
-                            <svg className="legend-symbol" viewBox="0 0 20 20">
-                                <rect x="2" y="2" width="16" height="16" rx="50%" className="current-marker"/>
-                            </svg>
-                            <span>Current Catalog</span>
+                            <div className="legend-symbol current-marker"></div>
+                            <span>Current</span>
                         </div>
                         <div className="legend-item">
-                            <svg className="legend-symbol" viewBox="0 0 20 20">
-                                <rect x="2" y="2" width="16" height="16" rx="2" className="upcoming-box"/>
-                            </svg>
-                            <span>Upcoming Catalog</span>
+                            <div className="legend-symbol upcoming-box"></div>
+                            <span>Upcoming</span>
                         </div>
-                        {showToday && (
-                            <div className="legend-item">
-                                <svg className="legend-symbol" viewBox="0 0 20 20">
-                                    <circle cx="10" cy="10" r="5" className="today-circle"/>
-                                </svg>
-                                <span>Today's Date</span>
-                            </div>
-                        )}
                     </div>
                 )}
-                
-                <div ref={chartRef} id="chart" style={{ width: '100%' }}></div>
+                <div id="chart" ref={chartRef}></div>
             </div>
         </div>
     );
