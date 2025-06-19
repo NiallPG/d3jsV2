@@ -1,6 +1,8 @@
 import { ReactElement, createElement } from "react";
 import { CatalogReleaseChartPreviewProps } from "../typings/CatalogReleaseChartProps";
 
+// component that provides preview in Studio Pro and Studio
+
 export function preview({ chartTitle }: CatalogReleaseChartPreviewProps): ReactElement {
     return (
         <div style={{ 

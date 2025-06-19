@@ -4,9 +4,14 @@ export type Platform = "web" | "desktop";
 
 export type Properties = PropertyGroup[];
 
+// config for preview in design mode in Studio Pro and Studio
+
+
 type PropertyGroup = {
     caption: string;
+    // The ? means this property is optional—it may or may not be present on the object.
     propertyGroups?: PropertyGroup[];
+    // PropertyGroup[] means this is an array of PropertyGroup objects.
     properties?: Property[];
 };
 

@@ -6,6 +6,8 @@ import * as d3 from "d3";
 // Main react component for the Catalog Release Chart
 // Renders d3 chart
 
+// the entry point for the widget
+
 import "./ui/CatalogReleaseChart.css";
 
 interface IndustryData {
@@ -440,7 +442,7 @@ export function CatalogReleaseChart(props: CatalogReleaseChartContainerProps): R
         );
     }
 
-    return (
+    return ( // viewBox: 0 0 32 20 means left edge at X=0, top edge at Y=0, width of 32 units, height of 20 units
         <div className="catalog-release-chart" data-theme={useDarkMode ? "dark" : "light"}>
             <div className="chart-container" ref={containerRef}>
                 {chartTitle && <h1 className="chart-title">{chartTitle}</h1>}

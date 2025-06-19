@@ -4,3 +4,5 @@ module.exports = {
     ...base,
     plugins: [require.resolve("@prettier/plugin-xml")],
 };
+
+// to allow us to modify the prettier rules for our code

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<!-- describes the widget structure, handed off to CRS -->
 <package xmlns="http://www.mendix.com/package/1.0/">
     <clientModule name="CatalogReleaseChart" version="1.0.0" xmlns="http://www.mendix.com/clientModule/1.0/">
         <widgetFiles>
